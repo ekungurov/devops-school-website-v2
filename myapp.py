@@ -56,10 +56,10 @@ def index():
   return render_template('planet-list.html', planetList = planetList)
   
 @app.route('/planet/<id>')
-def user(id):
-  planet = Planet.query.filter_by(id=id).first()
-  characterList = planet.people.all()
-  return render_template('character-list.html', planet = planet, characterList = characterList)
+def planet(id):
+  current_planet = Planet.query.filter_by(id=id).first()
+  characterList = current_planet.people.all()
+  return render_template('character-list.html', planet = current_planet, characterList = characterList)
 
 if __name__ == '__main__':
   app.run(debug=True)
