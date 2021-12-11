@@ -1,0 +1,33 @@
+<head>
+  <style>
+  table, th, td {
+    border: 1px solid #aaa;
+  }
+  </style>
+</head>
+<body>
+
+<h1>{{ planet['name'] }}</h1>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Gender</th>
+      <th>Eye Color</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in characterList %}
+    <tr>
+      <td>{{ row['id'] }}</td>
+      <td>{{ row['name'] }}</td>
+      <td>{{ row['gender'] }}</td>
+      <td>{{ row['eye_color'] }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<p><a href="/">Back to planets</a></p>
+
+</body>

@@ -1,0 +1,35 @@
+<head>
+  <style>
+  table, th, td {
+    border: 1px solid #aaa;
+  }
+  </style>
+</head>
+<body>
+
+<h1>Planets of a galaxy far, far away...</h1>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Climate</th>
+      <th>Gravity</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for planet in planetList %}
+    {% set id = planet['id'] %}
+    <tr>
+      <td>{{ id }}</td>
+      <td><a href={{ "planet/" ~ id }}>
+        {{ planet['name'] }}
+      </a></td>
+      <td>{{ planet['climate'] }}</td>
+      <td>{{ planet['gravity'] }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+</body>
