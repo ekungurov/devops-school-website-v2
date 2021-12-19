@@ -6,7 +6,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = \
     'mysql+pymysql://{user}:{password}@{host}/{dbname}'.format( \
     user = config.DB_LOGIN, password = config.DB_PASSWORD, \
-    host = config.DB_HOSTNAME, dbname = config.DB_NAME)
+    host = config.DB_HOST, dbname = config.DB_NAME)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)

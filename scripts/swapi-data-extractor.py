@@ -129,7 +129,7 @@ def parse_people():
 
 def main():
   global connection
-  connection = create_connection(config.DB_HOSTNAME, config.DB_LOGIN, config.DB_PASSWORD, config.DB_NAME)
+  connection = create_connection(config.DB_HOST, config.DB_LOGIN, config.DB_PASSWORD, config.DB_NAME)
   create_planets_table()
   create_people_table()
   disable_ssl_warnings()
