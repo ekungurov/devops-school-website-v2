@@ -62,4 +62,4 @@ def planet(id):
   return render_template('character-list.html', planet = current_planet, characterList = characterList)
 
 if __name__ == '__main__':
-  app.run(debug=True)
+  app.run(host='0.0.0.0', port=5000)
