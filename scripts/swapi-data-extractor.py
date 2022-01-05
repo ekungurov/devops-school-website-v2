@@ -3,12 +3,19 @@ import urllib3
 import json
 import logging
 import config
-import mysql.connector
-from mysql.connector import Error
 import re
+from sqlalchemy import create_engine
+from sqlalchemy import Column, Integer, BigInteger, Float, Text, DateTime, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, relationship
 
 REQUESTS_LIMIT = 20
-connection = None
+SQLALCHEMY_DATABASE_URI = \
+    'mysql+pymysql://{user}:{password}@{host}/{dbname}'.format( \
+    user = config.DB_LOGIN, password = config.DB_PASSWORD, \
+    host = config.DB_HOST, dbname = config.DB_NAME)
+session = None
+Base = declarative_base()
 
 def get_json(url):
   logging.warning(f"Fetching {url}")
@@ -17,95 +24,82 @@ def get_json(url):
 def disable_ssl_warnings():
   urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
 
-def create_connection(host_name, user_name, user_password, db_name):
-  connection = None
-  try:
-    connection = mysql.connector.connect(
-      host = host_name,
-      user = user_name,
-      passwd = user_password,
-      database = db_name
-    )
-    logging.info("Connection to MySQL DB successful")
-  except Error as e:
-    logging.error(e)
-  return connection
+class Planet(Base):
+  __tablename__ = 'planet'
+  id = Column(Integer, primary_key=True)
+  name = Column(Text)
+  rotation_period = Column(Integer)
+  orbital_period = Column(Integer)
+  diameter     = Column(Integer)
+  climate      = Column(Text)
+  gravity      = Column(Text)
+  terrain      = Column(Text)
+  surface_water = Column(Text)
+  population   = Column(BigInteger)
+  created_date = Column(DateTime)
+  updated_date = Column(DateTime)
+  url          = Column(Text)
+  people       = relationship('Person', backref='planet', lazy='dynamic')
 
-def create_planets_table():
-  query = """
-  CREATE TABLE IF NOT EXISTS planet (
-    id INTEGER PRIMARY KEY,
-    name TEXT,
-    rotation_period INTEGER,
-    orbital_period INTEGER,
-    diameter INTEGER,
-    climate TEXT,
-    gravity TEXT,
-    terrain TEXT,
-    surface_water TEXT,
-    population BIGINT,
-    created_date TIMESTAMP,
-    updated_date TIMESTAMP DEFAULT FROM_UNIXTIME(0),
-    url TEXT
-  ) ENGINE = InnoDB
-  """
-  cursor = connection.cursor()
-  cursor.execute(query)
-  connection.commit()
-  logging.info("Table 'planet' created")
+  def __repr__(self):
+    return '<Planet %r>' % self.name
 
-def create_people_table():
-  query = """
-  CREATE TABLE IF NOT EXISTS people (
-    id INTEGER PRIMARY KEY,
-    name TEXT,
-    height INTEGER,
-    mass FLOAT,
-    hair_color TEXT,
-    skin_color TEXT,
-    eye_color TEXT,
-    birth_year TEXT,
-    gender TEXT,
-    planet_id INTEGER NOT NULL REFERENCES planet(id),
-    created_date TIMESTAMP,
-    updated_date TIMESTAMP DEFAULT FROM_UNIXTIME(0),
-    url TEXT
-  ) ENGINE = InnoDB
-  """
-  cursor = connection.cursor()
-  cursor.execute(query)
-  connection.commit()
-  logging.info("Table 'people' created")
+class Person(Base):
+  __tablename__ = 'people'
+  id = Column(Integer, primary_key=True)
+  name = Column(Text)
+  height       = Column(Integer)
+  mass         = Column(Float)
+  hair_color   = Column(Text)
+  skin_color   = Column(Text)
+  eye_color    = Column(Text)
+  birth_year   = Column(Text)
+  gender       = Column(Text)
+  planet_id    = Column(Integer, ForeignKey('planet.id'))
+  created_date = Column(DateTime)
+  updated_date = Column(DateTime)
+  url          = Column(Text)
+
+  def __repr__(self):
+    return '<Person %r>' % self.name
 
 def insert_planet(planet):
-  id = re.search(r'/planets/(\d+)/', planet['url']).group(1)
-  
-  sql = "INSERT INTO planet ( id, name, rotation_period, orbital_period, diameter, climate, gravity, terrain, \
-                              surface_water, population, created_date, updated_date, url ) \
-         VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s )"
-  val = ( id, planet['name'], planet['rotation_period'], planet['orbital_period'], planet['diameter'], \
-          planet['climate'], planet['gravity'], planet['terrain'], planet['surface_water'], planet['population'], \
-          planet['created'], planet['edited'], planet['url'] )
-
-  cursor = connection.cursor()
-  cursor.execute(sql, val)
-  connection.commit()
+  planet_obj = Planet(
+    id = re.search(r'/planets/(\d+)/', planet['url']).group(1),
+    name = planet['name'],
+    rotation_period = planet['rotation_period'],
+    orbital_period = planet['orbital_period'],
+    diameter = planet['diameter'],
+    climate = planet['climate'],
+    gravity = planet['gravity'],
+    terrain = planet['terrain'],
+    surface_water = planet['surface_water'],
+    population = planet['population'],
+    created_date = planet['created'],
+    updated_date = planet['edited'],
+    url = planet['url'],
+  )
+  session.add(planet_obj)
+  session.commit()
 
 def insert_person(person):
-  id = re.search(r'/people/(\d+)/', person['url']).group(1)
-  planet_id = re.search(r'/planets/(\d+)/', person['homeworld']).group(1)
-  mass = person['mass'].replace(',', '')
-  
-  sql = "INSERT INTO people ( id, name, height, mass, hair_color, skin_color, eye_color, birth_year, \
-                              gender, planet_id, created_date, updated_date, url ) \
-         VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s )"
-  val = ( id, person['name'], person['height'], mass, person['hair_color'], person['skin_color'], \
-          person['eye_color'], person['birth_year'], person['gender'], planet_id, person['created'], \
-          person['edited'], person['url'] ) 
-  
-  cursor = connection.cursor()
-  cursor.execute(sql, val)
-  connection.commit()
+  person_obj = Person(
+    id = re.search(r'/people/(\d+)/', person['url']).group(1),
+    name = person['name'],
+    height = person['height'],
+    mass = person['mass'].replace(',', ''),
+    hair_color = person['hair_color'],
+    skin_color = person['skin_color'],
+    eye_color = person['eye_color'],
+    birth_year = person['birth_year'],
+    gender = person['gender'],
+    planet_id = re.search(r'/planets/(\d+)/', person['homeworld']).group(1),
+    created_date = person['created'],
+    updated_date = person['edited'],
+    url = person['url']
+  )
+  session.add(person_obj)
+  session.commit()
 
 def parse_planets():  
   requests_counter = 0
@@ -128,10 +122,11 @@ def parse_people():
     next_url = people_json['next']
 
 def main():
-  global connection
-  connection = create_connection(config.DB_HOST, config.DB_LOGIN, config.DB_PASSWORD, config.DB_NAME)
-  create_planets_table()
-  create_people_table()
+  global session
+  engine = create_engine(SQLALCHEMY_DATABASE_URI)
+  Session = sessionmaker(bind=engine)
+  session = Session()
+  #Base.metadata.create_all(engine)
   disable_ssl_warnings()
   parse_planets()
   parse_people()
