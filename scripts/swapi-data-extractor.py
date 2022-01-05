@@ -126,7 +126,7 @@ def main():
   engine = create_engine(SQLALCHEMY_DATABASE_URI)
   Session = sessionmaker(bind=engine)
   session = Session()
-  #Base.metadata.create_all(engine)
+  Base.metadata.create_all(engine)
   disable_ssl_warnings()
   parse_planets()
   parse_people()
