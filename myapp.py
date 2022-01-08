@@ -73,12 +73,12 @@ def planet(id):
 @app.route('/test_clear_data')
 def clear():
   recreate_tables()
-  return render_template('stub.html')
+  return render_template('cleared.html')
 
 @app.route('/test_fill_data')
 def fill():
   fill_tables()
-  return render_template('stub.html')
+  return render_template('filled.html')
 
 def get_json(url):
   logging.warning(f"Fetching {url}")
