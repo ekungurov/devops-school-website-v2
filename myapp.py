@@ -1,5 +1,6 @@
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
+from time import sleep
 import requests
 import urllib3
 import json
@@ -9,6 +10,7 @@ import re
 import os
 
 REQUESTS_LIMIT = 20
+DELAY_IN_SECONDS = 0.1
 
 app = Flask(__name__)
 user = os.getenv('DB_LOGIN', default = config.DB_LOGIN)
@@ -82,6 +84,7 @@ def fill():
 
 def get_json(url):
   logging.warning(f"Fetching {url}")
+  sleep(DELAY_IN_SECONDS)
   return requests.get(url, verify=False).json()
 
 def disable_ssl_warnings():
