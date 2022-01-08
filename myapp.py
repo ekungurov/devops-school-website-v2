@@ -1,7 +1,14 @@
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
+import requests
+import urllib3
+import json
+import logging
 import config
+import re
 import os
+
+REQUESTS_LIMIT = 20
 
 app = Flask(__name__)
 user = os.getenv('DB_LOGIN', default = config.DB_LOGIN)
@@ -11,7 +18,6 @@ dbname = os.getenv('DB_NAME', default = config.DB_NAME)
 app.config['SQLALCHEMY_DATABASE_URI'] = \
     f'mysql+pymysql://{user}:{password}@{host}/{dbname}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 db = SQLAlchemy(app)
 
 class Planet(db.Model):
@@ -63,6 +69,90 @@ def planet(id):
   current_planet = Planet.query.filter_by(id=id).first()
   characterList = current_planet.people.all()
   return render_template('character-list.html', planet = current_planet, characterList = characterList)
+
+@app.route('/test_clear_data')
+def clear():
+  recreate_tables()
+  return render_template('stub.html')
+
+@app.route('/test_fill_data')
+def fill():
+  fill_tables()
+  return render_template('stub.html')
+
+def get_json(url):
+  logging.warning(f"Fetching {url}")
+  return requests.get(url, verify=False).json()
+
+def disable_ssl_warnings():
+  urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
+
+def insert_planet(planet):
+  planet_obj = Planet(
+    id = re.search(r'/planets/(\d+)/', planet['url']).group(1),
+    name = planet['name'],
+    rotation_period = planet['rotation_period'],
+    orbital_period = planet['orbital_period'],
+    diameter = planet['diameter'],
+    climate = planet['climate'],
+    gravity = planet['gravity'],
+    terrain = planet['terrain'],
+    surface_water = planet['surface_water'],
+    population = planet['population'],
+    created_date = planet['created'],
+    updated_date = planet['edited'],
+    url = planet['url'],
+  )
+  db.session.add(planet_obj)
+
+def insert_person(person):
+  person_obj = Person(
+    id = re.search(r'/people/(\d+)/', person['url']).group(1),
+    name = person['name'],
+    height = person['height'],
+    mass = person['mass'].replace(',', ''),
+    hair_color = person['hair_color'],
+    skin_color = person['skin_color'],
+    eye_color = person['eye_color'],
+    birth_year = person['birth_year'],
+    gender = person['gender'],
+    planet_id = re.search(r'/planets/(\d+)/', person['homeworld']).group(1),
+    created_date = person['created'],
+    updated_date = person['edited'],
+    url = person['url']
+  )
+  db.session.add(person_obj)
+
+def parse_planets():
+  requests_counter = 0
+  next_url = "https://swapi.dev/api/planets/"
+  while next_url and requests_counter < REQUESTS_LIMIT:
+    planets_json = get_json(next_url)
+    requests_counter += 1
+    for planet in planets_json['results']:
+      insert_planet(planet)
+    next_url = planets_json['next']
+  db.session.commit()
+
+def parse_people():
+  requests_counter = 0
+  next_url = "https://swapi.dev/api/people/"
+  while next_url and requests_counter < REQUESTS_LIMIT:
+    people_json = get_json(next_url)
+    requests_counter += 1
+    for person in people_json['results']:
+      insert_person(person)
+    next_url = people_json['next']
+  db.session.commit()
+
+def recreate_tables():
+  db.drop_all()
+  db.create_all()
+
+def fill_tables():
+  disable_ssl_warnings()
+  parse_planets()
+  parse_people()
 
 if __name__ == '__main__':
   app.run(host='0.0.0.0', port=5000)
