@@ -1,12 +1,15 @@
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 import config
+import os
 
 app = Flask(__name__)
+user = os.getenv('DB_LOGIN', default = config.DB_LOGIN)
+password = os.getenv('DB_PASSWORD', default = config.DB_PASSWORD)
+host = os.getenv('DB_HOST', default = config.DB_HOST)
+dbname = os.getenv('DB_NAME', default = config.DB_NAME)
 app.config['SQLALCHEMY_DATABASE_URI'] = \
-    'mysql+pymysql://{user}:{password}@{host}/{dbname}'.format( \
-    user = config.DB_LOGIN, password = config.DB_PASSWORD, \
-    host = config.DB_HOST, dbname = config.DB_NAME)
+    f'mysql+pymysql://{user}:{password}@{host}/{dbname}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
