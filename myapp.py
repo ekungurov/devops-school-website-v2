@@ -63,14 +63,14 @@ class Person(db.Model):
 
 @app.route('/')
 def index():
-  planetList = Planet.query.all()
-  return render_template('planet-list.html', planetList = planetList)
+  planet_list = Planet.query.all()
+  return render_template('planet-list.html', planetList = planet_list)
   
 @app.route('/planet/<id>')
 def planet(id):
   current_planet = Planet.query.filter_by(id=id).first()
-  characterList = current_planet.people.all()
-  return render_template('character-list.html', planet = current_planet, characterList = characterList)
+  character_list = current_planet.people.all()
+  return render_template('character-list.html', planet = current_planet, characterList = character_list)
 
 @app.route('/test_clear_data')
 def clear():
@@ -102,10 +102,11 @@ def insert_planet(planet):
     terrain = planet['terrain'],
     surface_water = planet['surface_water'],
     population = planet['population'],
-    created_date = planet['created'],
-    updated_date = planet['edited'],
+    created_date = planet['created'][:-1],
+    updated_date = planet['edited'][:-1],
     url = planet['url'],
   )
+  logging.warning(planet_obj.created_date)
   db.session.add(planet_obj)
 
 def insert_person(person):
@@ -120,10 +121,11 @@ def insert_person(person):
     birth_year = person['birth_year'],
     gender = person['gender'],
     planet_id = re.search(r'/planets/(\d+)/', person['homeworld']).group(1),
-    created_date = person['created'],
-    updated_date = person['edited'],
+    created_date = person['created'][:-1],
+    updated_date = person['edited'][:-1],
     url = person['url']
   )
+  logging.warning(person_obj.created_date)
   db.session.add(person_obj)
 
 def parse_planets():
