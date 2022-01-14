@@ -7,8 +7,7 @@ node {
 
   stage('SonarQube analysis') {
     withSonarQubeEnv('SonarCloud') {
-      echo "${env.SONAR_HOST_URL}"
-      echo "${env.SONAR_CONFIG_NAME}"
+      sh 'sonar-scanner'
     }
   }
   
