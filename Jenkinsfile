@@ -9,6 +9,7 @@ node {
     withSonarQubeEnv('SonarCloud') {
       println ${env.SONAR_HOST_URL}
       println ${env.SONAR_CONFIG_NAME}
+    }
   }
   
   stage('Build image') {
