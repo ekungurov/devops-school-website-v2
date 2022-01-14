@@ -4,6 +4,12 @@ node {
   stage('Clone repository') {
     checkout scm
   }
+
+  stage('SonarQube analysis') {
+    withSonarQubeEnv('SonarCloud') {
+      println ${env.SONAR_HOST_URL}
+      println ${env.SONAR_CONFIG_NAME}
+  }
   
   stage('Build image') {
     app = docker.build("ekungurov/myapp")
