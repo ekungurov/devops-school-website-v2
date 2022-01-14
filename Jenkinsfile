@@ -7,8 +7,8 @@ node {
 
   stage('SonarQube analysis') {
     withSonarQubeEnv('SonarCloud') {
-      echo '${env.SONAR_HOST_URL}'
-      echo '${env.SONAR_CONFIG_NAME}'
+      echo "${env.SONAR_HOST_URL}"
+      echo "${env.SONAR_CONFIG_NAME}"
     }
   }
   
