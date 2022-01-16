@@ -76,12 +76,12 @@ def planet(id):
   character_list = current_planet.people.all()
   return render_template('character-list.html', planet = current_planet, characterList = character_list)
 
-@app.route('/test_clear_data')
+@app.route('/clear_data')
 def clear():
   recreate_tables()
   return render_template('cleared.html')
 
-@app.route('/test_fill_data')
+@app.route('/fill_data')
 def fill():
   fill_tables()
   return render_template('filled.html')
