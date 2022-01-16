@@ -21,6 +21,8 @@ spec:
         app: myapp
         release: canary
     spec:
+      imagePullSecrets:
+      - name: regcred
       containers:
       - name: myapp
         image: ekungurov/myapp:latest
@@ -39,5 +41,8 @@ spec:
             port: 5000
           initialDelaySeconds: 15
           periodSeconds: 60
-      imagePullSecrets:
-      - name: regcred
+        resources:
+          requests:
+            cpu: 100m
+          limits:
+            cpu: 200m

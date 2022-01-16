@@ -1,6 +1,7 @@
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from time import sleep
+from cpu_load_generator import load_single_core
 import requests
 import urllib3
 import json
@@ -69,6 +70,12 @@ def index():
 @app.route('/health')
 def health():
   return json.dumps({'healthy':True}), 200, {'ContentType':'application/json'} 
+
+@app.route('/cpu_load/<int:seconds>')
+@app.route('/cpu_load/')
+def cpu_load(seconds = 60):
+  load_single_core(core_num=0, duration_s=seconds, target_load=1.0)
+  return render_template('cpu-load.html')
   
 @app.route('/planet/<id>')
 def planet(id):
