@@ -22,6 +22,6 @@ spec:
         image: ekungurov/myapp:latest
         envFrom:
         - secretRef:
-          name: db-creds-and-params
+            name: db-creds-and-params
       imagePullSecrets:
       - name: regcred
