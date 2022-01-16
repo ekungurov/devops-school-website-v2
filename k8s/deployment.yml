@@ -20,14 +20,8 @@ spec:
       containers:
       - name: myapp
         image: ekungurov/myapp:latest
-        env:
-        - name: DB_HOST
-          value: "192.168.56.1"
-        - name: DB_LOGIN
-          value: "db_login"
-        - name: DB_PASSWORD
-          value: "some_secret_password"
-        - name: DB_NAME
-          value: "star_wars"
+        envFrom:
+        - secretRef:
+          name: db-creds-and-params
       imagePullSecrets:
       - name: regcred
