@@ -6,11 +6,15 @@ metadata:
   labels:
     app: myapp
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: myapp
       release: canary
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
   template:
     metadata:
       labels:
@@ -20,6 +24,7 @@ spec:
       containers:
       - name: myapp
         image: ekungurov/myapp:latest
+        imagePullPolicy: Always
         envFrom:
         - secretRef:
             name: db-creds-and-params
