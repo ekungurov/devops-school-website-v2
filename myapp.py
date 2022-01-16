@@ -65,6 +65,10 @@ class Person(db.Model):
 def index():
   planet_list = Planet.query.all()
   return render_template('planet-list.html', planetList = planet_list)
+
+@app.route('/health')
+def health():
+  return json.dumps({'healthy':True}), 200, {'ContentType':'application/json'} 
   
 @app.route('/planet/<id>')
 def planet(id):

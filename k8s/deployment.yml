@@ -28,5 +28,17 @@ spec:
         envFrom:
         - secretRef:
             name: db-creds-and-params
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 15
+          periodSeconds: 30
       imagePullSecrets:
       - name: regcred
