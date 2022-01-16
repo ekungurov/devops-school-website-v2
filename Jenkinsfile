@@ -27,11 +27,9 @@ node {
   }
 
   stage('Deploy to eks') {
-    steps {
-      withCredentials([usernamePassword(credentialsId: 'aws-token', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-        withKubeConfig([credentialsId: 'kube-config-file']) {
-          sh 'kubectl apply -f k8s/'
-        }
+    withCredentials([usernamePassword(credentialsId: 'aws-token', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+      withKubeConfig([credentialsId: 'kube-config-file']) {
+        sh 'kubectl apply -f k8s/'
       }
     }
   }
