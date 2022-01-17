@@ -25,7 +25,7 @@ spec:
       - name: regcred
       containers:
       - name: myapp
-        image: ekungurov/myapp:latest
+        image: ekungurov/myapp:__TAG__
         imagePullPolicy: Always
         envFrom:
         - secretRef:
