@@ -34,7 +34,7 @@ pipeline {
 
     stage('Deploy to eks') {
       agent {
-        docker { image 'rancher/kubectl:latest' }
+        docker { image 'bitnami/kubectl' }
       }
 
       steps {
