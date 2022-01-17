@@ -117,7 +117,7 @@ def insert_planet(planet):
     updated_date = planet['edited'][:-1],
     url = planet['url'],
   )
-  logging.warning(planet_obj.created_date)
+  logging.debug(planet_obj.created_date)
   db.session.add(planet_obj)
 
 def insert_person(person):
@@ -136,7 +136,7 @@ def insert_person(person):
     updated_date = person['edited'][:-1],
     url = person['url']
   )
-  logging.warning(person_obj.created_date)
+  logging.debug(person_obj.created_date)
   db.session.add(person_obj)
 
 def parse_planets():
