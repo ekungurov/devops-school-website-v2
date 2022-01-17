@@ -25,11 +25,11 @@ pipeline {
     }
 
     stage('Build image') {
-      steps {
-        agent {
-          docker { image 'docker:dind' }
-        }
+      agent {
+        docker { image 'docker:dind' }
+      }
 
+      steps {
         script {
           app = docker.build("ekungurov/myapp")
           docker.withRegistry('https://registry.hub.docker.com', 'docker_creds') {
