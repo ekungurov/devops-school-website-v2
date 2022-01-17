@@ -6,12 +6,6 @@ pipeline {
   }
 
   stages {
-    stage('Clone repository') {
-      steps {
-        checkout scm
-      }
-    }
-
     stage('SonarQube analysis') {
       agent {
         docker { image 'sonarsource/sonar-scanner-cli:latest' }
