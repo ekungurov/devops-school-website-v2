@@ -25,7 +25,9 @@ pipeline {
         script {
           app = docker.build("ekungurov/myapp")
           docker.withRegistry('https://registry.hub.docker.com', 'docker_creds') {
-            app.push("${env.IMAGE_TAG}")
+            if (env.IMAGE_TAG != "latest") {
+              app.push("${env.IMAGE_TAG}")
+            }
             app.push("latest")
           }
         }
