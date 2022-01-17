@@ -1,5 +1,5 @@
 pipeline {
-  agent none
+  agent any
 
   environment {
     AWS_REGION = 'eu-central-1'
@@ -20,10 +20,6 @@ pipeline {
     }
 
     stage('Build image') {
-      agent {
-        docker { image 'docker:latest' }
-      }
-
       steps {
         checkout scm
         script {
