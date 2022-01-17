@@ -1,35 +1,44 @@
-node {
-  def app
+pipeline {
+  agent any
 
   environment {
     AWS_REGION = 'eu-central-1'
   }
-  
-  stage('Clone repository') {
-    checkout scm
-  }
 
-  stage('SonarQube analysis') {
-    withSonarQubeEnv('SonarCloud') {
-      sh 'sonar-scanner'
+  stages {
+    stage('Clone repository') {
+      steps {
+        checkout scm
+      }
     }
-  }
-  
-  stage('Build image') {
-    app = docker.build("ekungurov/myapp")
-  }
-  
-  stage('Push image') {
-    docker.withRegistry('https://registry.hub.docker.com', 'docker_creds') {
-      app.push("0.0." + "${env.BUILD_NUMBER}")
-      app.push("latest")
-    }
-  }
 
-  stage('Deploy to eks') {
-    withCredentials([usernamePassword(credentialsId: 'aws-token', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-      withKubeConfig([credentialsId: 'kube-config-file']) {
-        sh 'kubectl apply -f k8s/'
+    stage('SonarQube analysis') {
+      steps {
+        withSonarQubeEnv('SonarCloud') {
+          sh 'sonar-scanner'
+        }
+      }
+    }
+
+    stage('Build image') {
+      steps {
+        script {
+          app = docker.build("ekungurov/myapp")
+          docker.withRegistry('https://registry.hub.docker.com', 'docker_creds') {
+            app.push("0.0." + "${env.BUILD_NUMBER}")
+            app.push("latest")
+          }
+        }
+      }
+    }
+
+    stage('Deploy to eks') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'aws-token', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+          withKubeConfig([credentialsId: 'kube-config-file']) {
+            sh 'kubectl apply -f k8s/'
+          }
+        }
       }
     }
   }
