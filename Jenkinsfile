@@ -25,10 +25,6 @@ pipeline {
     }
 
     stage('Build image') {
-      agent {
-        docker { image 'docker:latest' }
-      }
-
       steps {
         script {
           app = docker.build("ekungurov/myapp")
