@@ -33,10 +33,6 @@ pipeline {
     }
 
     stage('Deploy to eks') {
-      agent {
-        docker { image 'bitnami/kubectl' }
-      }
-
       steps {
         checkout scm
         withCredentials([usernamePassword(credentialsId: 'aws-token', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
