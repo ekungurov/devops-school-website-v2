@@ -26,7 +26,7 @@ pipeline {
 
     stage('Build image') {
       agent {
-        docker { image 'docker:dind' }
+        docker { image 'docker:latest' }
       }
 
       steps {
