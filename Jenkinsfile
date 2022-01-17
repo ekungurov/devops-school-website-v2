@@ -37,7 +37,7 @@ pipeline {
         checkout scm
         withCredentials([usernamePassword(credentialsId: 'aws-token', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
           withKubeConfig([credentialsId: 'kube-config-file']) {
-            sh "sed -i s/__TAG__/${env.IMAGE_TAG}/g' k8s/deployment.yml"
+            sh "sed -i 's/__TAG__/${env.IMAGE_TAG}/g' k8s/deployment.yml"
             sh 'kubectl apply -f k8s/'
           }
         }
